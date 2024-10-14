@@ -1,8 +1,8 @@
 import "./App.css";
-import { SteamDeals } from "./components/steam-deals";
+import Home from "./components/Home";
 
 function App() {
-  return <SteamDeals />;
+  return <Home />;
 }
 
 export default App;
