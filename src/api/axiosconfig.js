@@ -2,9 +2,8 @@ import axios from "axios";
 
 const api = axios.create();
 
-
 api.interceptors.request.use((config) => {  
-    config.baseURL = 'https://www.cheapshark.com/api/1.0/';
+    config.baseURL = `http://www.omdbapi.com/`;
     config.headers["Content-Type"] = "application/json";
     config.timeout = 3000;
     return config;

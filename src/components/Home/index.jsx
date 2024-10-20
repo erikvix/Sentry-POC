@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,134 +7,170 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getAllDeals } from "@/services/getAllDeals";
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Star, Award, DollarSign, Moon, Sun } from "lucide-react";
 import { ErrorModal } from "../ModalError";
-import axios from "axios";
 import Spinner from "../Spinner";
 import { captureException } from "@sentry/react";
+import { getMovie } from "@/services/getMovie";
+import { Input } from "../ui/input";
+import { Separator } from "@radix-ui/react-separator";
 
 export default function Home() {
-  const [games, setGames] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pageNumber, setPageNumber] = useState(1);
   const [error, setError] = useState(null);
+  const [movie, setMovie] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [theme, setTheme] = useState("dark");
+  const [isLoading, setIsLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
-  useEffect(() => {
+  const searchMovie = async () => {
     setIsLoading(true);
-    const getGames = async () => {
-      try {
-        setGames(await getAllDeals(pageNumber));
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    getGames();
-  }, [pageNumber]);
+    setError(null);
+    setNotFound(false);
 
-  const handleError = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      axios
-        .get("https://www.cheapshark.com/api/1.0/deals", { timeout: 1 })
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((error) => {
-          setError(error?.message);
-          captureException(error);
-          throw new Error(`Erro na requisição: ${error.message || error}`);
-        })
-        .finally(() => {
-          setIsLoading(false);
-          setError(null);
-        });
-    }, 5000);
-  };
-
-  const get15DollarsGames = () => {
     try {
-      return fetch("https://www.cheapshark.com/api/10/")
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-        });
+      const movie = await getMovie(searchTerm);
+
+      if (!movie || movie.Response === "False") {
+        setNotFound(true);
+        setMovie(null);
+      } else {
+        setMovie(movie);
+      }
     } catch (error) {
-      return <ErrorModal message={error.message} />;
+      captureException(error);
+      setError("Ocorreu um erro ao buscar o filme. Tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleNextPage = () => {
-    setPageNumber(pageNumber + 1);
+  const getError = () => {
+    throw new Error("Error");
   };
 
-  const handlePreviousPage = () => {
-    setPageNumber(pageNumber - 1);
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {error && <ErrorModal message={error} />}
-      <>
-        <div className="flex justify-center gap-4 items-center mb-4">
-          <Button onClick={handleError}>
-            {isLoading ? <Spinner /> : "Under $15"}
+    <div className="flex flex-col md:flex-row h-screen bg-background text-foreground">
+      <div className="w-full md:w-1/4 p-4 bg-card rounded-md border">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Movie Search</h1>
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {theme === "dark" ? (
+              <Sun className="h-[1.2rem] w-[1.2rem]" />
+            ) : (
+              <Moon className="h-[1.2rem] w-[1.2rem]" />
+            )}
           </Button>
-          <Button onClick={get15DollarsGames}>Under $15</Button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {games.map((game, index) => (
-            <Card
-              key={index}
-              className=" flex flex-col justify-between text-card-foreground"
-            >
-              <CardHeader className="p-4">
-                <a
-                  href={`https://www.cheapshark.com/redirect?dealID=${game.dealID}`}
-                >
+        <div className="space-y-4">
+          <Input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Enter movie title"
+          />
+          <Button onClick={searchMovie} className="w-full">
+            {isLoading ? <Spinner /> : "Search"}
+            {!isLoading && <Search className="ml-2 h-4 w-4" />}
+          </Button>
+          <Button onClick={getError} className="w-full">
+            Error
+          </Button>
+        </div>
+        {error && <p className="text-destructive mt-4">{error}</p>}
+        {notFound && (
+          <ErrorModal
+            message={"Filme não encontrado"}
+            onClose={() => setNotFound(false)}
+          />
+        )}
+      </div>
+
+      <div className="flex-1 py-4 md:px-4 md:py-0 overflow-auto">
+        {movie && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl md:text-3xl font-bold">
+                {movie.Title}{" "}
+                <span className="text-muted-foreground">({movie.Year})</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
                   <img
-                    src={game.thumb}
-                    alt={game.title}
-                    className="w-full h-auto object-cover rounded-md"
+                    src={movie.Poster}
+                    alt={movie.Title}
+                    className="w-full h-auto rounded-lg shadow-lg"
                   />
-                </a>
-              </CardHeader>
-              <CardContent className="p-4">
-                <CardTitle className="font-medium line-clamp-2 mb-2">
-                  {game.title}
-                </CardTitle>
-                <div className="flex justify-between items-center">
-                  <span className="text-lg text-lime-500 font-semibold">
-                    ${game.salePrice}
-                  </span>
-                  <Badge variant="secondary" className="line-through">
-                    ${game.normalPrice}
-                  </Badge>
                 </div>
-              </CardContent>
-              <CardFooter className="p-4 pt-0">
-                <Badge className="w-full justify-center bg-lime-600 hover:bg-lime-700 text-white">
-                  {Math.round(parseFloat(game.savings))}% OFF
-                </Badge>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-        <div className=" flex justify-center items-center mt-8 space-x-4">
-          <Button onClick={handlePreviousPage} disabled={pageNumber === 1}>
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Anterior
-          </Button>
-          <span className="text-sm font-medium">Página {pageNumber}</span>
-          <Button onClick={handleNextPage}>
-            Próxima
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
-      </>
+                <div className="md:col-span-2 space-y-4">
+                  <p className="text-lg">{movie.Plot}</p>
+                  <Separator />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-semibold">Director</h3>
+                      <p>{movie.Director}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Writers</h3>
+                      <p>{movie.Writer}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Stars</h3>
+                      <p>{movie.Actors}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Genre</h3>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {movie.Genre.split(", ").map((genre) => (
+                          <Badge key={genre} variant="secondary">
+                            {genre}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="flex flex-wrap justify-between items-center gap-2">
+                    <div className="flex items-center">
+                      <Star className="text-yellow-400 mr-1" />
+                      <span className="font-bold">{movie.imdbRating}</span>
+                      <span className="text-muted-foreground ml-1">
+                        ({movie.imdbVotes} votes)
+                      </span>
+                    </div>
+                    <div>
+                      <Badge variant="outline">{movie.Rated}</Badge>
+                    </div>
+                    <div>{movie.Runtime}</div>
+                  </div>
+                  <Separator />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-semibold flex items-center">
+                        <Award className="mr-1" /> Awards
+                      </h3>
+                      <p>{movie.Awards}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold flex items-center">
+                        <DollarSign className="mr-1" /> Box Office
+                      </h3>
+                      <p>{movie.BoxOffice}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
