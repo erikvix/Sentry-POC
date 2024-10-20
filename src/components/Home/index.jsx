@@ -58,7 +58,7 @@ export default function Home() {
     <div className="flex flex-col md:flex-row h-screen bg-background text-foreground">
       <div className="w-full md:w-1/4 p-4 bg-card rounded-md border">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Movie Search</h1>
+          <h1 className="text-2xl font-bold">Search Movie</h1>
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === "dark" ? (
               <Sun className="h-[1.2rem] w-[1.2rem]" />
