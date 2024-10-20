@@ -12,7 +12,7 @@
     "upload-sourcemaps": "sentry-cli releases files $VERSION upload-sourcemaps ./dist --ext map --rewrite",
     "clean-sourcemaps": "find ./dist -name '*.map' -delete",
     "finalize-release": "sentry-cli releases finalize $BUILD_ID",
-    "build:deploy": "npm run build && npm run upload-sourcemaps && npm run clean-sourcemaps && npm run finalize-release"
+    "build:deploy": "npm run build && npm run upload-sourcemaps && npm run clean-sourcemaps"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
