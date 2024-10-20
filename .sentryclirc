@@ -1,0 +1,7 @@
+bash
+[defaults]
+org=jusustudio
+project=sentry-poc
+
+[auth]
+token=$SENTRY_AUTH_TOKEN

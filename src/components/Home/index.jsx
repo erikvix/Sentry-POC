@@ -40,7 +40,7 @@ export default function Home() {
       }
     } catch (error) {
       captureException(error);
-      setError("Ocorreu um erro ao buscar o filme. Tente novamente.");
+      setError("Movie not found");
     } finally {
       setIsLoading(false);
     }

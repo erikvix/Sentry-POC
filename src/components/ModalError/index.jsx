@@ -11,7 +11,7 @@ import {
 import { AlertCircle } from "lucide-react";
 
 export function ErrorModal({ message }) {
-  const [isOpen, setIsOpen] = useState(true); // O modal é aberto inicialmente
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
