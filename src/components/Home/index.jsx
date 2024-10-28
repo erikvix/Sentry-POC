@@ -8,13 +8,14 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "../ui/button";
-import { Search, Star, Award, DollarSign, Moon, Sun } from "lucide-react";
+import { Search, Star, Award, DollarSign } from "lucide-react";
 import { ErrorModal } from "../ModalError";
 import Spinner from "../Spinner";
 import { captureException } from "@sentry/react";
 import { getMovie } from "@/services/getMovie";
 import { Input } from "../ui/input";
 import { Separator } from "@radix-ui/react-separator";
+import Darkmode from "../Darkmode";
 
 export default function Home() {
   const [error, setError] = useState(null);
@@ -50,22 +51,12 @@ export default function Home() {
     throw new Error("Error");
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
   return (
     <div className="flex flex-col md:flex-row h-screen bg-background text-foreground">
       <div className="w-full md:w-1/4 p-4 bg-card rounded-md border">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Search Movie</h1>
-          <Button variant="ghost" size="icon" onClick={toggleTheme}>
-            {theme === "dark" ? (
-              <Sun className="h-[1.2rem] w-[1.2rem]" />
-            ) : (
-              <Moon className="h-[1.2rem] w-[1.2rem]" />
-            )}
-          </Button>
+          <Darkmode />
         </div>
         <div className="space-y-4">
           <Input
