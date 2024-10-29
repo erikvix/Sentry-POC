@@ -1,21 +1,15 @@
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "../ui/button";
 import { Search, Star, Award, DollarSign } from "lucide-react";
 import { ErrorModal } from "../ModalError";
 import Spinner from "../Spinner";
-import { captureException } from "@sentry/react";
+import { captureException, setTag } from "@sentry/react";
 import { getMovie } from "@/services/getMovie";
 import { Input } from "../ui/input";
-import { Separator } from "@radix-ui/react-separator";
 import Darkmode from "../Darkmode";
+import { Separator } from "../ui/separator";
 
 export default function Home() {
   const [error, setError] = useState(null);
@@ -41,6 +35,7 @@ export default function Home() {
       }
     } catch (error) {
       captureException(error);
+      setTag("NotFound", "true");
       setError("Movie not found");
     } finally {
       setIsLoading(false);
@@ -106,7 +101,7 @@ export default function Home() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <h3 className="font-semibold">Director</h3>
-                      <p>{movie.Director}</p>
+                      <p className="">{movie.Director}</p>
                     </div>
                     <div>
                       <h3 className="font-semibold">Writers</h3>
@@ -118,7 +113,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h3 className="font-semibold">Genre</h3>
-                      <div className="flex flex-wrap gap-2 mt-1">
+                      <div className="flex flex-wrap justify-center gap-2 mt-1">
                         {movie.Genre.split(", ").map((genre) => (
                           <Badge key={genre} variant="secondary">
                             {genre}
@@ -127,7 +122,7 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <Separator />
+                  <Separator orientation="horizontal" />
                   <div className="flex flex-wrap justify-between items-center gap-2">
                     <div className="flex items-center">
                       <Star className="text-yellow-400 mr-1" />
