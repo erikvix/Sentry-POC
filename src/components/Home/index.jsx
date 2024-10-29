@@ -26,10 +26,10 @@ export default function Home() {
 
     try {
       const movie = await getMovie(searchTerm);
-
       if (!movie || movie.Response === "False") {
         setNotFound(true);
         setMovie(null);
+        throw new Error(movie.Error);
       } else {
         setMovie(movie);
       }
@@ -68,7 +68,6 @@ export default function Home() {
             Error
           </Button>
         </div>
-        {error && <p className="text-destructive mt-4">{error}</p>}
         {notFound && (
           <ErrorModal
             message={"Filme não encontrado"}
